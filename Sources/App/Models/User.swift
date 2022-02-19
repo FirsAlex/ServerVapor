@@ -13,7 +13,12 @@ final class User: Model, Content {
     @Field(key: "telephone")
     var telephone: String
     
+    @Timestamp(key: "created_at", on: .create, format: .iso8601)
+    var createdAt: Date?
     
+    // When this Planet was last updated.
+    @Timestamp(key: "updated_at", on: .update, format: .iso8601)
+    var updatedAt: Date?
 
     init() { }
 
