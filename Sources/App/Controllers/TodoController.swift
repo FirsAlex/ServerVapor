@@ -1,12 +1,12 @@
 import Fluent
 import Vapor
 
-struct TodoController: RouteCollection {
+struct UserController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
-        let todos = routes.grouped("todos")
+        let todos = routes.grouped("users")
         todos.get(use: index)
         todos.post(use: create)
-        todos.group(":todoID") { todo in
+        todos.group(":userID") { todo in
             todo.delete(use: delete)
         }
     }
