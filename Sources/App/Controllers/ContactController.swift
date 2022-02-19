@@ -21,7 +21,7 @@ struct ContactController: RouteCollection {
                 todo.get(use: selectContactByID)
             }
             
-            todos.group("by_users", ":userID") { todo in
+            todos.group("by_user", ":userID") { todo in
                 todo.post(use: insertContact)
             }
     }
