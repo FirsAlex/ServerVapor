@@ -27,6 +27,10 @@ struct UserController: RouteCollection {
                 todo.get(use: selectUserByID)
                 todo.patch(use: updateUserByID)
             }
+            
+            todos.group("by_telephone/:telephone") { todo in
+                todo.get(use: selectUserByTelephone)
+            }
     }
 
     func selectAllUsers(req: Request) throws -> EventLoopFuture<[User]> {
@@ -42,11 +46,18 @@ struct UserController: RouteCollection {
             .unwrap(or: Abort(.notFound)) // return 404 if the todo hasn't been found
     }
     
+    func selectUserByTelephone(req: Request) throws -> EventLoopFuture<User> {
+        guard let telephone = req.parameters.get("telephone") else {
+                throw Abort(.badRequest, reason: "Invalid parameter `telephone`")
+        }
+        return User.query(on: req.db).filter(\.$telephone == telephone).first().unwrap(or: Abort(.notFound))
+    }
+    
     func insertUser(req: Request) throws -> EventLoopFuture<User> {
-            let createTodoRequestBody = try req.content.decode(CreateTodoRequestBody.self)
-            let todo = createTodoRequestBody.makeTodo()
+            let createUserRequestBody = try req.content.decode(CreateUserRequestBody.self)
+            let user = createUserRequestBody.makeUser()
             return todo.save(on: req.db)
-                .map { todo }
+                .map { user }
     }
     
     func deleteAllUsers(req: Request) throws -> EventLoopFuture<HTTPStatus> {
