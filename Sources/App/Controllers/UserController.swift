@@ -56,8 +56,7 @@ struct UserController: RouteCollection {
     func insertUser(req: Request) throws -> EventLoopFuture<User> {
             let createUserRequestBody = try req.content.decode(CreateUserRequestBody.self)
             let user = createUserRequestBody.makeUser()
-            return todo.save(on: req.db)
-                .map { user }
+            return user.save(on: req.db).map { user }
     }
     
     func deleteAllUsers(req: Request) throws -> EventLoopFuture<HTTPStatus> {
@@ -89,9 +88,9 @@ struct UserController: RouteCollection {
                     if let telephone = patchUserRequestBody.telephone {
                         user.telephone = telephone
                     }
-                    return todo.update(on: req.db)
-                        .transform(to: user)
+                    return user.update(on: req.db)
+                        .transform(to: .ok)// .map { user }
                 }
-                .transform(to: .ok)
+                
     }
 }

@@ -26,7 +26,7 @@ struct ContactController: RouteCollection {
             }
     }
 
-    func insertContact(req: Request) throws -> EventLoopFuture<User> {
+    func insertContact(req: Request) throws -> EventLoopFuture<Contact> {
         guard let userIDString = req.parameters.get("userID"),
             let userID = UUID(userIDString) else {
                 throw Abort(.badRequest, reason: "Invalid parameter `userID`")
@@ -41,7 +41,7 @@ struct ContactController: RouteCollection {
         return Contact.query(on: req.db).all()
     }
 
-    func selectContactByID(req: Request) throws -> EventLoopFuture<User> {
+    func selectContactByID(req: Request) throws -> EventLoopFuture<Contact> {
         guard let contactIDString = req.parameters.get("contactID"),
             let contactID = UUID(contactIDString) else {
                 throw Abort(.badRequest, reason: "Invalid parameter `contactID`")
