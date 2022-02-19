@@ -28,7 +28,7 @@ struct UserController: RouteCollection {
                 todo.patch(use: updateUserByID)
             }
             
-            todos.group("by_telephone/:telephone") { todo in
+            todos.group("by_telephone",":telephone") { todo in
                 todo.get(use: selectUserByTelephone)
             }
     }
