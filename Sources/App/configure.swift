@@ -13,4 +13,5 @@ public func configure(_ app: Application) throws {
     try app.autoMigrate().wait()
     // register routes
     try routes(app)
+    app.http.server.configuration.hostname = "192.168.1.58"
 }
