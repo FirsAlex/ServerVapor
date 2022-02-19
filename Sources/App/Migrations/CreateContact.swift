@@ -7,7 +7,7 @@ struct CreateContact: Migration {
             .field("name", .string, .required)
             .field("telephone", .string, .required)
             .field("created_at", .string, .required)
-            .field("user_id", .uuid, .required, .references("user", "id"))
+            .field("user_id", .uuid, .required, .references("users", "id"))
             .create()
     }
 
