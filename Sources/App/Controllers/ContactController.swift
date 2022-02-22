@@ -23,7 +23,16 @@ struct ContactController: RouteCollection {
             
             todos.group("by_user", ":userID") { todo in
                 todo.post(use: insertContact)
+                todo.get(use: selectContactsByUserID)
             }
+    }
+    
+    func selectContactsByUserID(req: Request) throws -> EventLoopFuture<[Contact]> {
+        guard let userIDString = req.parameters.get("userID"),
+              let userID = UUID(userIDString) else {
+                throw Abort(.badRequest, reason: "Invalid parameter `userID`")
+        }
+        return Contact.query(on: req.db).filter(\.$user.$id == userID).all()
     }
 
     func insertContact(req: Request) throws -> EventLoopFuture<Contact> {
