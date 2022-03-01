@@ -66,9 +66,7 @@ struct ContactController: RouteCollection {
     }
     
     func deleteAllContacts(req: Request) throws -> EventLoopFuture<HTTPStatus> {
-        return Contact.query(on: req.db)
-            .delete()
-            .transform(to: .ok) // transform to response status code 200
+        return Contact.query(on: req.db).delete().transform(to: .ok) // transform to response status code 200
     }
 
     func deleteContactByID(req: Request) throws -> EventLoopFuture<HTTPStatus> {

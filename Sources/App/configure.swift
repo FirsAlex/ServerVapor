@@ -10,6 +10,7 @@ public func configure(_ app: Application) throws {
     app.databases.use(.sqlite(.file("db.sqlite")), as: .sqlite)
     app.migrations.add(CreateUser())
     app.migrations.add(CreateContact())
+    app.migrations.add(CreateMessage())
     try app.autoMigrate().wait()
     // register routes
     try routes(app)

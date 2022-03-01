@@ -60,9 +60,7 @@ struct UserController: RouteCollection {
     }
     
     func deleteAllUsers(req: Request) throws -> EventLoopFuture<HTTPStatus> {
-        return User.query(on: req.db)
-            .delete()
-            .transform(to: .ok) // transform to response status code 200
+        return User.query(on: req.db).delete().transform(to: .ok) // transform to response status code 200
     }
 
     func deleteUserByID(req: Request) throws -> EventLoopFuture<HTTPStatus> {

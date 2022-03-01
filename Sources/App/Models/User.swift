@@ -22,6 +22,12 @@ final class User: Model, Content {
     @Children(for: \.$user)
     var contacts: [Contact]
 
+    @Children(for: \.$fromUser)
+    var fromUsers: [Message]
+    
+    @Children(for: \.$toUser)
+    var toUsers: [Message]
+    
     init() { }
 
     init(id: UUID? = nil, name: String, telephone: String) {
