@@ -10,6 +10,11 @@ struct CreateContactRequestBody: Content {
     }
 }
 
+struct PatchContactRequestBody: Content {
+        let name: String?
+        let telephone: String?
+}
+
 struct ContactController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
         let todos = routes.grouped("contacts")
@@ -19,6 +24,7 @@ struct ContactController: RouteCollection {
             todos.group(":contactID") { todo in
                 todo.delete(use: deleteContactByID)
                 todo.get(use: selectContactByID)
+                todo.patch(use: updateContactByID)
             }
             
             todos.group("by_user", ":userID") { todo in
@@ -72,4 +78,24 @@ struct ContactController: RouteCollection {
             .transform(to: .ok)
     }
     
+    func updateContactByID(req: Request) throws -> EventLoopFuture<HTTPStatus> {
+            guard let contactIDString = req.parameters.get("contactID"),
+                let contactID = UUID(contactIDString) else {
+                    throw Abort(.badRequest, reason: "Invalid parameter `contactID`")
+            }
+
+            let patchContactRequestBody = try req.content.decode(PatchContactRequestBody.self)
+            return Contact.find(contactID, on: req.db)
+                .unwrap(or: Abort(.notFound))
+                .flatMap { contact in
+                    if let name = patchContactRequestBody.name {
+                        contact.name = name
+                    }
+                    if let telephone = patchContactRequestBody.telephone {
+                        contact.telephone = telephone
+                    }
+                    return contact.update(on: req.db)
+                        .transform(to: .ok)// .map { user }
+                }
+    }
 }
