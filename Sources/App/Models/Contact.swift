@@ -15,6 +15,9 @@ final class Contact: Model, Content {
     
     @Timestamp(key: "created_at", on: .create, format: .iso8601)
     var createdAt: Date?
+    
+    @Timestamp(key: "updated_at", on: .update, format: .iso8601)
+    var updatedAt: Date?
 
     @Parent(key: "user_id")
     var user: User
