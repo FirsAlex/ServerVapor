@@ -1,5 +1,6 @@
 import Fluent
 import Vapor
+import AppKit
 
 final class Message: Model, Content {
     static let schema = "messages"
