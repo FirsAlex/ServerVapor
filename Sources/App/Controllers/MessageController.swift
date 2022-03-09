@@ -55,7 +55,7 @@ struct MessageController: RouteCollection {
               let userID = UUID(userIDString),
               let contactIDString = getMessageRequestBody.contactID,
               let contactID = UUID(contactIDString) else {
-                throw Abort(.badRequest, reason: "Invalid parameter `userID or contactID`")
+                throw Abort(.badRequest, reason: "Invalid parameter `userID` or `contactID`")
         }
         return Message.query(on: req.db).group(.and) { group in
             group.filter(\.$fromUser.$id ~~ [userID, contactID])
