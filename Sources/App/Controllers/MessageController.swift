@@ -46,7 +46,25 @@ struct MessageController: RouteCollection {
         
             todos.group("between_users") { todo in
                 todo.get(use: selectMessageBetweenUsers)
+                todo.patch(use: updateDelivered)
             }
+    }
+    
+    func updateDelivered(req: Request) throws -> EventLoopFuture<HTTPStatus> {
+        let getMessageRequestBody = try req.query.decode(GetMessageRequestBody.self)
+        guard let userIDString = getMessageRequestBody.userID,
+              let userID = UUID(userIDString),
+              let contactIDString = getMessageRequestBody.contactID,
+              let contactID = UUID(contactIDString) else {
+                throw Abort(.badRequest, reason: "Invalid parameter `userID` or `contactID`")
+        }
+        return Message.query(on: req.db)
+                      .set(\.$delivered, to: true)
+                      .group(.and) { group in
+                          group.filter(\.$fromUser.$id == contactID)
+                               .filter(\.$toUser.$id == userID)
+                          .filter(\.$delivered == false)}
+                      .update().transform(to: .ok)
     }
     
     func selectMessageBetweenUsers(req: Request) throws -> EventLoopFuture<[Message]> {
@@ -60,6 +78,7 @@ struct MessageController: RouteCollection {
         return Message.query(on: req.db).group(.and) { group in
             group.filter(\.$fromUser.$id ~~ [userID, contactID])
                 .filter(\.$toUser.$id ~~ [userID, contactID])
+                .filter(\.$delivered == false)
         }.sort(\.$createdAt).all()
     }
     
