@@ -20,6 +20,7 @@ struct PatchMessageRequestBody: Content {
 struct GetMessageRequestBody: Content {
     let userID: String?
     let contactID: String?
+    let delivered: String?
 }
 
 struct MessageController: RouteCollection {
@@ -63,7 +64,7 @@ struct MessageController: RouteCollection {
                       .group(.and) { group in
                           group.filter(\.$fromUser.$id == contactID)
                                .filter(\.$toUser.$id == userID)
-                          .filter(\.$delivered == false)}
+                               .filter(\.$delivered == false)}
                       .update().transform(to: .ok)
     }
     
@@ -72,12 +73,14 @@ struct MessageController: RouteCollection {
         guard let userIDString = getMessageRequestBody.userID,
               let userID = UUID(userIDString),
               let contactIDString = getMessageRequestBody.contactID,
-              let contactID = UUID(contactIDString) else {
+              let contactID = UUID(contactIDString),
+              let delivered = getMessageRequestBody.delivered else {
                 throw Abort(.badRequest, reason: "Invalid parameter `userID` or `contactID`")
         }
         return Message.query(on: req.db).group(.and) { group in
-            group.filter(\.$fromUser.$id ~~ [userID, contactID])
-                .filter(\.$toUser.$id ~~ [userID, contactID])
+            group.filter(\.$fromUser.$id ~~ (delivered == "all" ? [userID, contactID] : [contactID]))
+                .filter(\.$toUser.$id ~~ (delivered == "all" ? [userID, contactID] : [userID]))
+                .filter(\.$delivered ~~ (delivered == "all" ? [true, false] : [false]))
         }.sort(\.$createdAt).all()
     }
     
