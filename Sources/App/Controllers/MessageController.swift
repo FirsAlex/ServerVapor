@@ -78,7 +78,6 @@ struct MessageController: RouteCollection {
         return Message.query(on: req.db).group(.and) { group in
             group.filter(\.$fromUser.$id ~~ [userID, contactID])
                 .filter(\.$toUser.$id ~~ [userID, contactID])
-                .filter(\.$delivered == false)
         }.sort(\.$createdAt).all()
     }
     
