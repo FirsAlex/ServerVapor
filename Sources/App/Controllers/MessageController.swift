@@ -69,6 +69,9 @@ struct MessageController: RouteCollection {
     }
     
     func selectMessageBetweenUsers(req: Request) throws -> EventLoopFuture<[Message]> {
+        var fromUserID: [UUID] = []
+        var toUserID: [UUID] = []
+        var deliveredValue: [Bool] = []
         let getMessageRequestBody = try req.query.decode(GetMessageRequestBody.self)
         guard let userIDString = getMessageRequestBody.userID,
               let userID = UUID(userIDString),
@@ -77,10 +80,18 @@ struct MessageController: RouteCollection {
               let delivered = getMessageRequestBody.delivered else {
                 throw Abort(.badRequest, reason: "Invalid parameter `userID` or `contactID`")
         }
+        switch delivered {
+            case "falseIncomming":
+            fromUserID = [contactID]; toUserID = [userID]; deliveredValue = [false]
+            case "falseOutgoing":
+            fromUserID = [userID]; toUserID = [contactID]; deliveredValue = [false]
+            default:
+            fromUserID = [userID, contactID]; toUserID = [userID, contactID]; deliveredValue = [true, false]
+        }
         return Message.query(on: req.db).group(.and) { group in
-            group.filter(\.$fromUser.$id ~~ (delivered == "all" ? [userID, contactID] : [contactID]))
-                .filter(\.$toUser.$id ~~ (delivered == "all" ? [userID, contactID] : [userID]))
-                .filter(\.$delivered ~~ (delivered == "all" ? [true, false] : [false]))
+            group.filter(\.$fromUser.$id ~~ fromUserID)
+                .filter(\.$toUser.$id ~~ toUserID)
+                .filter(\.$delivered ~~ deliveredValue)
         }.sort(\.$createdAt).all()
     }
     
