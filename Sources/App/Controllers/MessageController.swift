@@ -83,8 +83,8 @@ struct MessageController: RouteCollection {
         switch delivered {
             case "falseIncomming":
             fromUserID = [contactID]; toUserID = [userID]; deliveredValue = [false]
-            case "falseOutgoing":
-            fromUserID = [userID]; toUserID = [contactID]; deliveredValue = [false]
+            case "trueOutgoing":
+            fromUserID = [userID]; toUserID = [contactID]; deliveredValue = [true]
             default:
             fromUserID = [userID, contactID]; toUserID = [userID, contactID]; deliveredValue = [true, false]
         }
