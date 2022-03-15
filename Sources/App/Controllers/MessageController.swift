@@ -49,6 +49,24 @@ struct MessageController: RouteCollection {
                 todo.get(use: selectMessageBetweenUsers)
                 todo.patch(use: updateDelivered)
             }
+        
+            todos.group("last_between_users") { todo in
+                todo.get(use: selectLastMessageBetweenUsers)
+            }
+    }
+    
+    func selectLastMessageBetweenUsers(req: Request) throws -> EventLoopFuture<Message> {
+        let getMessageRequestBody = try req.query.decode(GetMessageRequestBody.self)
+        guard let userIDString = getMessageRequestBody.userID,
+              let userID = UUID(userIDString),
+              let contactIDString = getMessageRequestBody.contactID,
+              let contactID = UUID(contactIDString) else {
+                throw Abort(.badRequest, reason: "Invalid parameter `userID` or `contactID`")
+        }
+        return Message.query(on: req.db).group(.and) { group in
+            group.filter(\.$fromUser.$id ~~ [userID, contactID])
+                .filter(\.$toUser.$id ~~ [userID, contactID])
+        }.sort(\.$createdAt, .descending).first().unwrap(or: Abort(.notFound))
     }
     
     func updateDelivered(req: Request) throws -> EventLoopFuture<HTTPStatus> {
